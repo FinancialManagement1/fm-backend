@@ -9,8 +9,13 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Initialize db connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Initialize Api and Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -26,6 +31,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+// Test database connection
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -38,6 +45,14 @@ using (var scope = app.Services.CreateScope())
     {
         Console.WriteLine("Database connection failed.");
     }
+}
+
+//
+if (app.Environment.IsDevelopment())
+{
+    Console.WriteLine("Running in development environment. Enabling Swagger UI.");
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.Run();
