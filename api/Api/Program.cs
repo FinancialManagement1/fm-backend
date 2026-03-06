@@ -47,12 +47,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-//
-if (app.Environment.IsDevelopment())
-{
-    Console.WriteLine("Running in development environment. Enabling Swagger UI.");
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Run();
+
