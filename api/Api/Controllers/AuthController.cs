@@ -7,6 +7,7 @@ namespace Api.Controllers
     [Route("auth")]
     public class AuthController : Controller
     {
+        // POST: /auth/register
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
@@ -26,7 +27,7 @@ namespace Api.Controllers
                 return StatusCode(409,new { message = "Email already exists" });
             }
 
-            var response = new RegisterResponse
+            var response = new AuthResponse
             {
                 Token = "fake-jwt-token",
                 ExpiresIn = 3600,
@@ -34,6 +35,45 @@ namespace Api.Controllers
             };
 
             return StatusCode(201, response);
+        }
+
+        // POST: /auth/login
+           [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginRequest request)
+        {
+            if (request == null)
+            {
+                return StatusCode(400, new
+                {
+                    message = "The server could not understand the request due to invalid syntax."
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.email) || string.IsNullOrWhiteSpace(request.password))
+            {
+                return StatusCode(400, new
+                {
+                    message = "Email and password are required"
+                });
+            }
+
+            // Fake login check
+            if (request.email != "test@test.com" || request.password != "Password123")
+            {
+                return StatusCode(401, new
+                {
+                    message = "Invalid email or password"
+                });
+            }
+
+            var response = new AuthResponse
+            {
+                Token = "fake-jwt-token",
+                ExpiresIn = 3600,
+                Message = "Login successful"
+            };
+
+            return StatusCode(200, response);
         }
     }
 }
