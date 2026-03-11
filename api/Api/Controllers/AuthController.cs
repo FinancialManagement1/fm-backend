@@ -1,49 +1,80 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Api.DTOs;
+﻿using Api.DTOs;
+using BusinessLogic.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("auth")]
-    public class AuthController : Controller
+    public class AuthController : ControllerBase
     {
+        private readonly IAuthService _authService;
+
+        public AuthController(IAuthService authService)
+        {
+            _authService = authService;
+        }
+
         // POST: /auth/register
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            if (request == null) 
+            if (request == null)
             {
-                return StatusCode(400,new {message = "The server could not understand the request due to invalid syntax." });
+                return BadRequest(new
+                {
+                    message = "The server could not understand the request due to invalid syntax."
+                });
             }
 
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(request.Name) ||
+                string.IsNullOrWhiteSpace(request.Email) ||
+                string.IsNullOrWhiteSpace(request.Password))
             {
-                return StatusCode(400,new { message = "Email and password are required" });
+                return BadRequest(new
+                {
+                    message = "Name, email and password are required."
+                });
             }
 
-            // Fake duplicate email check
-            if (request.Email == "existing@test.com")
+            try
             {
-                return StatusCode(409,new { message = "Email already exists" });
+                var user = await _authService.RegisterAsync(
+                    request.Name,
+                    request.Email,
+                    request.Password,
+                    request.Country,
+                    request.PreferredCurrency
+                );
+
+                var response = new RegisterResponse
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Country = user.Country,
+                    PreferredCurrency = user.PreferredCurrency,
+                    CreatedAt = user.CreatedAt
+                };
+
+                return StatusCode(201, response);
             }
-
-            var response = new AuthResponse
+            catch (Exception ex)
             {
-                Token = "fake-jwt-token",
-                ExpiresIn = 3600,
-                Message = "User successfully registered"
-            };
-
-            return StatusCode(201, response);
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
         }
 
         // POST: /auth/login
-           [HttpPost("login")]
+        [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
             if (request == null)
             {
-                return StatusCode(400, new
+                return BadRequest(new
                 {
                     message = "The server could not understand the request due to invalid syntax."
                 });
@@ -51,7 +82,7 @@ namespace Api.Controllers
 
             if (string.IsNullOrWhiteSpace(request.email) || string.IsNullOrWhiteSpace(request.password))
             {
-                return StatusCode(400, new
+                return BadRequest(new
                 {
                     message = "Email and password are required"
                 });
@@ -60,7 +91,7 @@ namespace Api.Controllers
             // Fake login check
             if (request.email != "test@test.com" || request.password != "Password123")
             {
-                return StatusCode(401, new
+                return Unauthorized(new
                 {
                     message = "Invalid email or password"
                 });
@@ -73,7 +104,7 @@ namespace Api.Controllers
                 Message = "Login successful"
             };
 
-            return StatusCode(200, response);
+            return Ok(response);
         }
     }
 }

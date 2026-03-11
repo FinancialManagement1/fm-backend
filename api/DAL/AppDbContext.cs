@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DAL.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL
 {
@@ -8,5 +9,7 @@ namespace DAL
             : base(options)
         {
         }
+        public DbSet<User> Users { get; set; }
+
     }
 }
