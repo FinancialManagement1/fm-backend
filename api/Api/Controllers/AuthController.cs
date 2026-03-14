@@ -47,17 +47,15 @@ namespace Api.Controllers
                     request.PreferredCurrency
                 );
 
-                var response = new RegisterResponse
+                var response = new AuthResponse
                 {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    Country = user.Country,
-                    PreferredCurrency = user.PreferredCurrency,
-                    CreatedAt = user.CreatedAt
+                    Token = "fake-jwt-token",
+                    ExpiresIn = 3600,
+                    Message = "User successfully registered"
                 };
 
                 return StatusCode(201, response);
+
             }
             catch (Exception ex)
             {
