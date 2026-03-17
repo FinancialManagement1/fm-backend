@@ -20,13 +20,17 @@ namespace Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "The server could not understand the request due to invalid syntax."
+                });
+            }
+
             try
             {
-                if (request == null)
-                {
-                    throw new InvalidSyntaxException();
-                }
-                var user = await _authService.RegisterAsync(
+                var response = await _authService.RegisterAsync(
                     request.Name,
                     request.Email,
                     request.Password,
@@ -34,22 +38,8 @@ namespace Api.Controllers
                     request.PreferredCurrency
                 );
 
-                var response = new AuthResponseDto
-                {
-                    Token = "fake-jwt-token",
-                    ExpiresIn = 3600,
-                    Message = "User successfully registered"
-                };
-
                 return StatusCode(201, response);
 
-            }
-            catch (InvalidSyntaxException ex)
-            {
-                return StatusCode(400, new
-                {
-                    message = ex.Message
-                });
             }
             catch (EmailAlreadyExistsException ex)
             {
@@ -60,7 +50,10 @@ namespace Api.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "The server encountered an unexpected condition that prevented it from fulfilling the request.");
+                return StatusCode(500, new
+                {
+                    message = "The server encountered an unexpected condition that prevented it from fulfilling the request."
+                });
             }
         }
 
@@ -68,37 +61,21 @@ namespace Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest( new
+                {
+                    message = "The server could not understand the request due to invalid syntax."
+                });
+            }
             try
             {
-                if (loginRequestDto == null)
-                {
-                    throw new InvalidSyntaxException();
-                }
-                if (string.IsNullOrWhiteSpace(loginRequestDto.Email) || !loginRequestDto.Email.Contains("@") || string.IsNullOrWhiteSpace(loginRequestDto.Password))
-                {
-                    throw new InvalidCredentialsException();
-                }
-                var user = await _authService.LoginAsync(loginRequestDto.Email, loginRequestDto.Password);
-
-                var response = new AuthResponseDto
-                {
-                    Token = "fake-jwt-token",
-                    ExpiresIn = 3600,
-                    Message = "Authentication successful"
-                };
-
-                return StatusCode(200, response);
-            }
-            catch (InvalidSyntaxException ex)
-            {
-                return StatusCode(400, new
-                {
-                    message = ex.Message
-                });
+                var response = await _authService.LoginAsync(loginRequestDto.Email, loginRequestDto.Password);
+                return Ok(response);
             }
             catch (InvalidCredentialsException ex)
             {
-                return StatusCode(401, new
+                return Unauthorized( new
                 {
                     message = ex.Message
                 });

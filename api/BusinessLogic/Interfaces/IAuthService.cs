@@ -5,7 +5,7 @@ namespace BusinessLogic.Interfaces
 {
     public interface IAuthService
     {
-        Task<User> RegisterAsync(string name, string email, string password, string country, string preferredCurrency);
-        Task<User> LoginAsync(string email, string password);
+        Task<AuthResponse> RegisterAsync(string name, string email, string password, string country, string preferredCurrency);
+        Task<AuthResponse> LoginAsync(string email, string password);
     }
 }
