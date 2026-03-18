@@ -45,7 +45,7 @@ namespace Api.Tests.Controllers
                 PreferredCurrency = "EUR"
             };
 
-            var response = new AuthResponse
+            var response = new AuthResponseDto
             {
                 Token = "fake-jwt-token",
                 ExpiresIn = 3600,
@@ -66,7 +66,7 @@ namespace Api.Tests.Controllers
             var objectResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(201, objectResult.StatusCode);
 
-            var value = Assert.IsType<AuthResponse>(objectResult.Value);
+            var value = Assert.IsType<AuthResponseDto>(objectResult.Value);
             Assert.Equal("User successfully registered", value.Message);
         }
 
@@ -146,7 +146,7 @@ namespace Api.Tests.Controllers
                 Password = "Password123"
             };
 
-            var response = new AuthResponse
+            var response = new AuthResponseDto
             {
                 Token = "fake-jwt-token",
                 ExpiresIn = 3600,
@@ -162,7 +162,7 @@ namespace Api.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, okResult.StatusCode);
 
-            var value = Assert.IsType<AuthResponse>(okResult.Value);
+            var value = Assert.IsType<AuthResponseDto>(okResult.Value);
             Assert.Equal("Authentication successful", value.Message);
         }
 

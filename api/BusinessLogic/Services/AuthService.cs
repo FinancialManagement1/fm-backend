@@ -16,7 +16,7 @@ namespace BusinessLogic.Services
             _userRepository = userRepository;
         }
 
-        public async Task<AuthResponse> RegisterAsync(string name, string email, string password, string country, string preferredCurrency)
+        public async Task<AuthResponseDto> RegisterAsync(string name, string email, string password, string country, string preferredCurrency)
         {
             var existingUser = await _userRepository.GetByEmailAsync(email);
 
@@ -37,7 +37,7 @@ namespace BusinessLogic.Services
                 CreatedAt = DateTime.UtcNow
             });
 
-            var response = new AuthResponse
+            var response = new AuthResponseDto
             {
                 Token = "fake-jwt-token",
                 ExpiresIn = 3600,
@@ -47,7 +47,7 @@ namespace BusinessLogic.Services
             return response;
         }
 
-        public async Task<AuthResponse> LoginAsync(string email, string password)
+        public async Task<AuthResponseDto> LoginAsync(string email, string password)
         {
             var user = await _userRepository.GetByEmailAsync(email) ?? throw new InvalidCredentialsException();
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
@@ -57,7 +57,7 @@ namespace BusinessLogic.Services
                 throw new InvalidCredentialsException();
             }
 
-            var response = new AuthResponse
+            var response = new AuthResponseDto
             {
                 Token = "fake-jwt-token",
                 ExpiresIn = 3600,
