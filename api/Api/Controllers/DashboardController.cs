@@ -2,6 +2,7 @@
 using BusinessLogic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Authentication;
 using System.Security.Claims;
 
 namespace Api.Controllers
@@ -34,8 +35,23 @@ namespace Api.Controllers
                 return Unauthorized(new { message = "Invalid token." });
             }
 
-            var result = await _dashboardService.GetDashboardOverviewAsync(userId);
-            return Ok(result);
+            try 
+            {
+                var result = await _dashboardService.GetDashboardOverviewAsync(userId);
+                return Ok(result);
+            }
+            catch (InvalidCredentialException ex)
+            {
+                return Unauthorized(new ErrorResponseDto 
+                { 
+                    Message = ex.Message 
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while processing your request." });
+            }
+            
         }
     }
 }

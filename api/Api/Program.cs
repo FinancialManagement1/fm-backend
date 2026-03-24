@@ -81,10 +81,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
 var app = builder.Build();
