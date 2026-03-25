@@ -17,7 +17,7 @@ namespace BusinessLogic.Services
             _jwtTokenService = jwtTokenService;
         }
 
-        public async Task<AuthResponseDto> RegisterAsync(string name, string email, string password, string country, string preferredCurrency)
+        public async Task<AuthResponse> RegisterAsync(string name, string email, string password, string country, string preferredCurrency)
         {
             var existingUser = await _userRepository.GetByEmailAsync(email);
 
@@ -42,17 +42,19 @@ namespace BusinessLogic.Services
 
             var token = _jwtTokenService.GenerateToken(createdUser);
             var expiresIn = _jwtTokenService.GetTokenExpirationInSeconds();
-            var response = new AuthResponseDto
+            var response = new AuthResponse
             {
                 Token = token,
                 ExpiresIn = expiresIn,
                 Message = "User successfully registered"
             };
 
+
+
             return response;
         }
 
-        public async Task<AuthResponseDto> LoginAsync(string email, string password)
+        public async Task<AuthResponse> LoginAsync(string email, string password)
         {
             var user = await _userRepository.GetByEmailAsync(email) ?? throw new InvalidCredentialsException();
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
@@ -64,7 +66,7 @@ namespace BusinessLogic.Services
 
             var token = _jwtTokenService.GenerateToken(user);
             var expiresIn = _jwtTokenService.GetTokenExpirationInSeconds();
-            var response = new AuthResponseDto
+            var response = new AuthResponse
             {
                 Token = token,
                 ExpiresIn = expiresIn,

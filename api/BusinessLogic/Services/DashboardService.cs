@@ -2,6 +2,7 @@
 using BusinessLogic.Models;
 using DAL.Entities;
 using DAL.Interfaces;
+using System.Security.Authentication;
 
 namespace BusinessLogic.Services
 {
@@ -25,7 +26,7 @@ namespace BusinessLogic.Services
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new InvalidCredentialException();
 
             var now = DateTime.UtcNow;
             var startOfMonth = new DateTime(now.Year, now.Month, 1);

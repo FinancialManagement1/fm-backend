@@ -1,5 +1,5 @@
-﻿using DAL.Interfaces;
-using DAL.Entities;
+﻿using DAL.Entities;
+using DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories
@@ -27,6 +27,13 @@ namespace DAL.Repositories
             return await _context.Transactions
                 .Where(t => t.UserId == userId)
                 .SumAsync(t => t.Type == TransactionType.Income ? t.Amount : -t.Amount);
+        }
+
+        public async Task<Transaction> CreateAsync(Transaction transaction)
+        {
+            _context.Transactions.Add(transaction);
+            await _context.SaveChangesAsync();
+            return transaction;
         }
     }
 }

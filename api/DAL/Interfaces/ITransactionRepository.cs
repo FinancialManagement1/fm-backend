@@ -6,5 +6,6 @@ namespace DAL.Interfaces
     {
         Task<List<Transaction>> GetByUserAndPeriodAsync(int userId, DateTime startDate, DateTime endDate);
         Task<double> GetCurrentBalanceAsync(int userId);
+        Task<Transaction> CreateAsync(Transaction transaction);
     }
 }
