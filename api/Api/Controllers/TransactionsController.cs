@@ -19,7 +19,7 @@ namespace Api.Controllers
         }
 
         [Authorize]
-        [HttpPost("transactions")]
+        [HttpPost]
         public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionRequest request)
         {
             if (!ModelState.IsValid)
@@ -77,8 +77,8 @@ namespace Api.Controllers
 
                 return Ok(new
                 {
-                    message = "Transactions retrieved successfully",
-                    data = transactions
+                    items = transactions,
+                    total = transactions.Count
                 });
             }
             catch (Exception)
