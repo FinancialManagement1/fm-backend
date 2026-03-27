@@ -67,5 +67,15 @@ namespace DAL.Repositories
                 .OrderByDescending(t => t.Date)
                 .ToListAsync();
         }
+        public async Task<Transaction?> GetByIdAsync(int id)
+        {
+            return await _context.Transactions.FindAsync(id);
+        }
+
+        public async Task UpdateAsync(Transaction transaction)
+        {
+            _context.Transactions.Update(transaction);
+            await _context.SaveChangesAsync();
+        }
     }
 }

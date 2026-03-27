@@ -19,5 +19,8 @@ namespace DAL.Entities
         public TransactionType Type { get; set; }
 
         public DateTime Date { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

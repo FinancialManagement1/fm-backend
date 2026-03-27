@@ -9,5 +9,7 @@ namespace DAL.Interfaces
         Task<double> GetCurrentBalanceAsync(int userId);
         Task<Transaction> CreateAsync(Transaction transaction);
         Task<List<Transaction>> GetFilteredAsync(int userId, TransactionType? type, string? category, DateTime? startDate, DateTime? endDate);
+        Task<Transaction?> GetByIdAsync(int id);
+        Task UpdateAsync(Transaction transaction);
     }
 }

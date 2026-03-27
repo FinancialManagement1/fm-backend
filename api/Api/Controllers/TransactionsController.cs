@@ -85,7 +85,28 @@ namespace Api.Controllers
             {
                 return BadRequest(new ErrorResponse { Message = "The server encountered an unexpected condition that prevented it from fullfilling the request" });
             }
-            { }
+        }
+        [Authorize]
+        [HttpPut("{transactionId}")]
+        public async Task<IActionResult> UpdateTransaction(int transactionId,[FromBody] UpdateTransactionRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    Message = "The server could not understand the request due to invalid syntax."
+                });
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized(new ErrorResponse { Message = "Unauthorized. Missing or invalid JWT token." });
+            }
+
+            await _transactionService.UpdateTransactionAsync(transactionId, userId, request);
+
+            return Ok();
         }
     }
 }

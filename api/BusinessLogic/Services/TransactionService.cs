@@ -1,4 +1,5 @@
 ﻿using BusinessLogic.Interfaces;
+using BusinessLogic.Mappers;
 using BusinessLogic.Models;
 using DAL.Entities;
 using DAL.Enum;
@@ -19,7 +20,7 @@ namespace BusinessLogic.Services
             _transactionRepository = transactionRepository;
         }
 
-        public async Task CreateTransactionAsync(int userId, CreateTransactionRequest request)
+        public async Task<TransactionResponse> CreateTransactionAsync(int userId, CreateTransactionRequest request)
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
@@ -47,10 +48,12 @@ namespace BusinessLogic.Services
                 Type = transactionType
             };
 
-            await _transactionRepository.CreateAsync(transaction);
+            var newTransaction = await _transactionRepository.CreateAsync(transaction);
+
+            return TransactionResponseMapper.ToResponse(newTransaction);
         }
 
-        public async Task<List<TransactionResponseDto>> GetTransactionsAsync(int userId, GetTransactionsQuery query)
+        public async Task<List<TransactionResponse>> GetTransactionsAsync(int userId, GetTransactionsQuery query)
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
@@ -87,7 +90,7 @@ namespace BusinessLogic.Services
                 startDate,
                 endDate);
 
-            return transactions.Select(t => new TransactionResponseDto
+            return transactions.Select(t => new TransactionResponse
             {
                 Id = t.Id,
                 Type = t.Type == TransactionType.Income ? "income" : "expense",
@@ -98,6 +101,28 @@ namespace BusinessLogic.Services
                 Date = t.Date
             }).ToList();
         }
+        public async Task UpdateTransactionAsync(int transactionId, int userId, UpdateTransactionRequest request)
+        {
+            var transaction = await _transactionRepository.GetByIdAsync(transactionId);
 
+            if (transaction == null || transaction.UserId != userId)
+                throw new Exception("Transaction not found.");
+
+            TransactionType type = request.Type.Trim().ToLower() switch
+            {
+                "income" => TransactionType.Income,
+                "expense" => TransactionType.Expense,
+                _ => throw new Exception("Invalid transaction type.")
+            };
+
+            transaction.Type = type;
+            transaction.Amount = request.Amount;
+            transaction.Currency = request.Currency ?? transaction.Currency;
+            transaction.Category = request.Category;
+            transaction.Description = request.Description;
+            transaction.Date = request.Date;
+
+            await _transactionRepository.UpdateAsync(transaction);
+        }
     }
 }
