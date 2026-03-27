@@ -67,14 +67,30 @@ namespace DAL.Repositories
                 .OrderByDescending(t => t.Date)
                 .ToListAsync();
         }
-        public async Task<Transaction?> GetByIdAsync(int id)
+        public async Task<Transaction?> GetByIdAsync(int transactionId, int userId)
         {
-            return await _context.Transactions.FindAsync(id);
+            return await _context.Transactions
+                .FirstOrDefaultAsync(t => t.Id == transactionId && t.UserId == userId);
         }
 
-        public async Task UpdateAsync(Transaction transaction)
+        public async Task<Transaction?> UpdateAsync(Transaction transaction)
         {
             _context.Transactions.Update(transaction);
+            await _context.SaveChangesAsync();
+            return await _context.Transactions.FindAsync(transaction.Id);
+        }
+
+        public async Task DeleteAsync(int transactionId, int userId)
+        {
+            var transaction = await _context.Transactions
+                .FirstOrDefaultAsync(t => t.Id == transactionId && t.UserId == userId);
+
+            if (transaction == null)
+            {
+                throw new Exception("Transaction not found or access denied.");
+            }
+
+            _context.Transactions.Remove(transaction);
             await _context.SaveChangesAsync();
         }
     }

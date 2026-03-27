@@ -6,6 +6,7 @@ namespace BusinessLogic.Interfaces
     {
         Task<TransactionResponse> CreateTransactionAsync(int userId, CreateTransactionRequest request);
         Task<List<TransactionResponse>> GetTransactionsAsync(int userId, GetTransactionsQuery query);
-        Task UpdateTransactionAsync(int transactionId, int userId, UpdateTransactionRequest request);
+        Task<TransactionResponse> UpdateTransactionAsync(int transactionId, int userId, UpdateTransactionRequest request);
+        Task DeleteTransactionAsync(int transactionId, int userId);
     }
 }

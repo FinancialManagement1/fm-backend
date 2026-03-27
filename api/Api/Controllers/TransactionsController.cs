@@ -4,6 +4,7 @@ using BusinessLogic.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Api.Controllers
 {
@@ -39,18 +40,15 @@ namespace Api.Controllers
 
             try
             {
-                await _transactionService.CreateTransactionAsync(userId, request);
+                var createdTransaction = await _transactionService.CreateTransactionAsync(userId, request);
 
-                return StatusCode(201, new
-                {
-                    message = "Transaction created successfully"
-                });
+                return StatusCode(201, createdTransaction);
             }
             catch (Exception)
             {
-                return BadRequest( new ErrorResponse { Message = "The server encountered an unexpected condition that prevented it from fullfilling the request" });
+                return BadRequest(new ErrorResponse { Message = "The server encountered an unexpected condition that prevented it from fullfilling the request" });
             }
-            
+
         }
 
         [Authorize]
@@ -88,7 +86,7 @@ namespace Api.Controllers
         }
         [Authorize]
         [HttpPut("{transactionId}")]
-        public async Task<IActionResult> UpdateTransaction(int transactionId,[FromBody] UpdateTransactionRequest request)
+        public async Task<IActionResult> UpdateTransaction(int transactionId, [FromBody] UpdateTransactionRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -104,9 +102,35 @@ namespace Api.Controllers
                 return Unauthorized(new ErrorResponse { Message = "Unauthorized. Missing or invalid JWT token." });
             }
 
-            await _transactionService.UpdateTransactionAsync(transactionId, userId, request);
+            try
+            {
+                var transaction = await _transactionService.UpdateTransactionAsync(transactionId, userId, request);
 
-            return Ok();
+                return Ok(transaction);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse { Message = "The server encountered an unexpected condition that prevented it from fullfilling the request" });
+            }
+        }
+        [Authorize]
+        [HttpDelete("{transactionId}")]
+        public async Task<IActionResult> DeleteTransaction(int transactionId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized(new ErrorResponse { Message = "Unauthorized. Missing or invalid JWT token." });
+            }
+            try
+            {
+                await _transactionService.DeleteTransactionAsync(transactionId, userId);
+                return Ok(new { message = "Transaction deleted successfully" });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new ErrorResponse { Message = "The server encountered an unexpected condition that prevented it from fullfilling the request" });
+            }
         }
     }
 }

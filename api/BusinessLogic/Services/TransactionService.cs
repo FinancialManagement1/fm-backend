@@ -1,4 +1,5 @@
-﻿using BusinessLogic.Interfaces;
+﻿using BusinessLogic.Exceptions;
+using BusinessLogic.Interfaces;
 using BusinessLogic.Mappers;
 using BusinessLogic.Models;
 using DAL.Entities;
@@ -25,7 +26,7 @@ namespace BusinessLogic.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                throw new Exception("User not found.");
+                throw new InvalidCredentialsException();
             }
 
             TransactionType transactionType = request.Type.Trim().ToLower() switch
@@ -45,7 +46,9 @@ namespace BusinessLogic.Services
                 Category = request.Category,
                 Description = request.Description,
                 Date = request.Date,
-                Type = transactionType
+                Type = transactionType,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             var newTransaction = await _transactionRepository.CreateAsync(transaction);
@@ -58,7 +61,7 @@ namespace BusinessLogic.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                throw new Exception("User not found.");
+                throw new InvalidCredentialsException();
             }
 
             TransactionType? transactionType = query.Type?.Trim().ToLower() switch
@@ -90,20 +93,24 @@ namespace BusinessLogic.Services
                 startDate,
                 endDate);
 
-            return transactions.Select(t => new TransactionResponse
+
+            var mappedTransactions = new List<TransactionResponse>();
+            foreach (var transaction in transactions) 
             {
-                Id = t.Id,
-                Type = t.Type == TransactionType.Income ? "income" : "expense",
-                Amount = t.Amount,
-                Currency = t.Currency,
-                Category = t.Category,
-                Description = t.Description,
-                Date = t.Date
-            }).ToList();
+                mappedTransactions.Add(TransactionResponseMapper.ToResponse(transaction));
+            }
+
+            return mappedTransactions;
         }
-        public async Task UpdateTransactionAsync(int transactionId, int userId, UpdateTransactionRequest request)
+        public async Task<TransactionResponse> UpdateTransactionAsync(int transactionId, int userId, UpdateTransactionRequest request)
         {
-            var transaction = await _transactionRepository.GetByIdAsync(transactionId);
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidCredentialsException();
+            }
+
+            var transaction = await _transactionRepository.GetByIdAsync(transactionId, userId);
 
             if (transaction == null || transaction.UserId != userId)
                 throw new Exception("Transaction not found.");
@@ -121,8 +128,15 @@ namespace BusinessLogic.Services
             transaction.Category = request.Category;
             transaction.Description = request.Description;
             transaction.Date = request.Date;
+            transaction.UpdatedAt = DateTime.UtcNow;
 
-            await _transactionRepository.UpdateAsync(transaction);
+            var updatedTransaction = await _transactionRepository.UpdateAsync(transaction);
+
+            return TransactionResponseMapper.ToResponse(updatedTransaction);
+        }
+        public async Task DeleteTransactionAsync(int transactionId, int userId)
+        {
+            _transactionRepository.DeleteAsync(transactionId, userId).Wait();
         }
     }
 }
