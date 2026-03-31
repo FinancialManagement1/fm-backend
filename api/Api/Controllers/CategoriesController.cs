@@ -13,36 +13,21 @@ namespace Api.Controllers
     [Route("categories")]
     public class CategoriesController : Controller
     {
-        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetCategories()
+        public IActionResult GetCategories()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out int userId))
-            {
-                return Unauthorized(new ErrorResponse { Message = "Unauthorized. Missing or invalid JWT token." });
-            }
-
-            try 
-            {
                 // In a real application, you would fetch categories from a database based on the userId.
                 // For this example, we will return a static list of categories.
-                var items = Enum.GetValues(typeof(TransactionType))
-                    .Cast<TransactionType>()
-                    .Select(t => new CategoryItem
-                    {
-                        Type = t.ToString().ToLowerInvariant(),
-                        Name = t.ToString()
-                    })
-                    .ToList();
+            var items = Enum.GetValues(typeof(TransactionType))
+                .Cast<TransactionType>()
+                .Select(t => new CategoryItem
+                {
+                    Type = t.ToString().ToLowerInvariant(),
+                    Name = t.ToString()
+                })
+                .ToList();
 
-                return Ok(items);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception (not implemented here)
-                return StatusCode(500, new ErrorResponse { Message = "An error occurred while fetching categories." });
-            }
+            return Ok(new { items });
         }
     }
 }

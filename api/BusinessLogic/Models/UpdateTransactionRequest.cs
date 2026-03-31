@@ -3,11 +3,11 @@
 public class UpdateTransactionRequest
 {
     [Required]
-    [RegularExpression("^(income|expense)$")]
+    [RegularExpression("^(income|expense)$", ErrorMessage = "Type must be either 'income' or 'expense'.")]
     public string Type { get; set; } = string.Empty;
 
     [Required]
-    [Range(0.01, double.MaxValue)]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0.")]
     public double Amount { get; set; }
 
     [Required]
@@ -23,5 +23,5 @@ public class UpdateTransactionRequest
 
     [Required]
     [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Date must be in format yyyy-MM-dd")]
-    public string Date { get; set; }
+    public string Date { get; set; } = string.Empty;
 }

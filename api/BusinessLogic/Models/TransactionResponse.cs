@@ -17,10 +17,10 @@ namespace BusinessLogic.Models
         [Required]
         public string? Description { get; set; }
         [Required]
-        public string Date { get; set; }
+        public string Date { get; set; } = string.Empty;
         [Required]
-        public string CreatedAt { get; set; }
+        public string CreatedAt { get; set; } = string.Empty;
         [Required]
-        public string UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; } = string.Empty;
     }
 }
