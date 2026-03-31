@@ -5,6 +5,7 @@ using BusinessLogic.Models;
 using DAL.Entities;
 using DAL.Enum;
 using DAL.Interfaces;
+using System.Globalization;
 
 namespace BusinessLogic.Services
 {
@@ -36,6 +37,16 @@ namespace BusinessLogic.Services
                 _ => throw new Exception("Invalid transaction type.")
             };
 
+            if (!DateTime.TryParseExact(
+            request.Date,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out DateTime parsedDate))
+            {
+                throw new Exception("Date must be a valid date in format yyyy-MM-dd.");
+            }
+
             var transaction = new Transaction
             {
                 UserId = userId,
@@ -45,7 +56,7 @@ namespace BusinessLogic.Services
                     : request.Currency,
                 Category = request.Category,
                 Description = request.Description,
-                Date = request.Date,
+                Date = parsedDate,
                 Type = transactionType,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -122,12 +133,23 @@ namespace BusinessLogic.Services
                 _ => throw new Exception("Invalid transaction type.")
             };
 
+            if (!DateTime.TryParseExact(
+            request.Date,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out DateTime parsedDate))
+            {
+                throw new Exception("Date must be a valid date in format yyyy-MM-dd.");
+            }
+
+
             transaction.Type = type;
             transaction.Amount = request.Amount;
             transaction.Currency = request.Currency ?? transaction.Currency;
             transaction.Category = request.Category;
             transaction.Description = request.Description;
-            transaction.Date = request.Date;
+            transaction.Date = parsedDate;
             transaction.UpdatedAt = DateTime.UtcNow;
 
             var updatedTransaction = await _transactionRepository.UpdateAsync(transaction);

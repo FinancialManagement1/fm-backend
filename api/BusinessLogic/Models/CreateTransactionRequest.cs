@@ -13,7 +13,8 @@ namespace BusinessLogic.Models
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0.")]
         public double Amount { get; set; }
 
-        [RegularExpression("^[A-Z]{3}$", ErrorMessage = "Currency must be a 3-letter uppercase code.")]
+        [Required]
+        [RegularExpression("^(EUR|USD|GBP|CZK|PLN)$", ErrorMessage = "Invalid currency code")]
         public string? Currency { get; set; }
 
         [Required]
@@ -24,6 +25,7 @@ namespace BusinessLogic.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime Date { get; set; }
+        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Date must be in format yyyy-MM-dd")]
+        public string Date { get; set; } = string.Empty;
     }
 }
