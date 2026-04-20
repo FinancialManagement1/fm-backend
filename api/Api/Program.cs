@@ -105,6 +105,25 @@ builder.Services.AddScoped<IBudgetService, BudgetService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    try
+    {
+        await db.Database.CanConnectAsync();
+
+        // Optional: test a real query
+        var test = await db.Users.FirstOrDefaultAsync();
+
+        Console.WriteLine("Database connected and query executed.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"DB ERROR: {ex.Message}");
+    }
+}
+
 // DONT TOUCH THESE 2, THEY ARE FOR SWAGGER DEPLOYMENT
 app.UseSwagger();
 app.UseSwaggerUI();
